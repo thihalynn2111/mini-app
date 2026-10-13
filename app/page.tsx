@@ -1,67 +1,183 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+
+interface Post {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: { id: string; username: string; avatar?: string };
+}
+
+interface CurrentUser {
+  id: string;
+  username: string;
+  email: string;
+}
+
+export default function HomePage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [content, setContent] = useState("");
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchCurrentUser();
+    fetchPosts();
+  }, []);
+
+  const fetchCurrentUser = async () => {
+    const res = await fetch("/api/profile");
+    if (res.ok) {
+      const data = await res.json();
+      setCurrentUser(data);
+    }
+  };
+
+  const fetchPosts = async () => {
+    const res = await fetch("/api/posts");
+    if (res.ok) {
+      const data = await res.json();
+      setPosts(data);
+    }
+  };
+
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const res = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+
+    if (res.ok) {
+      setContent("");
+      fetchPosts();
+    } else {
+      const data = await res.json();
+      setError(data.message || "Failed to create post");
+    }
+  };
+
+  const handleUpdatePost = async (id: string) => {
+    const res = await fetch(`/api/posts/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: editContent }),
+    });
+
+    if (res.ok) {
+      setEditingPostId(null);
+      fetchPosts();
+    }
+  };
+
+  const handleDeletePost = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this post?")) return;
+    const res = await fetch(`/api/posts/${id}`, { method: "DELETE" });
+    if (res.ok) fetchPosts();
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <div className="min-h-screen bg-gray-50">
+      <main className="mx-auto max-w-2xl px-4 py-8">
+        {/* Create Post Form */}
+        <div className="mb-6 rounded-lg border bg-white p-4 shadow-sm">
+          <h2 className="mb-2 text-lg font-semibold text-gray-800">
+            Create a Post
+          </h2>
+          {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
+          <form onSubmit={handleCreatePost}>
+            <textarea
+              className="w-full rounded-md border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
+              placeholder="What's happening?"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              required
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="mt-2 flex justify-end">
+              <button
+                type="submit"
+                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                Post
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Feed List */}
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <div
+              key={post.id}
+              className="rounded-lg border bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-center justify-between border-b pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-gray-900">
+                    @{post.user.username}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {new Date(post.createdAt).toLocaleString()}
+                </span>
+              </div>
+
+              {editingPostId === post.id ? (
+                <div className="mt-3">
+                  <textarea
+                    className="w-full rounded border p-2 text-sm"
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                  />
+                  <div className="mt-2 flex justify-end gap-2">
+                    <button
+                      onClick={() => setEditingPostId(null)}
+                      className="rounded px-3 py-1 text-xs font-medium text-gray-600 border"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleUpdatePost(post.id)}
+                      className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p className="my-3 text-gray-800 whitespace-pre-line">
+                  {post.content}
+                </p>
+              )}
+
+              {currentUser?.id === post.user.id &&
+                editingPostId !== post.id && (
+                  <div className="flex justify-end gap-3 border-t pt-2">
+                    <button
+                      onClick={() => {
+                        setEditingPostId(post.id);
+                        setEditContent(post.content);
+                      }}
+                      className="text-xs font-medium text-blue-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="text-xs font-medium text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+            </div>
+          ))}
         </div>
       </main>
     </div>

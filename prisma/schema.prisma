@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+
+ 
+  
+
+generator client {
+  provider = "prisma-client-js"
+   output   = "../node_modules/.prisma/client"
+}
+
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+  
+}
+
+model User {
+  id        String    @id @default(cuid())
+  username  String?   @unique
+  email     String    @unique
+  password  String
+  bio       String?   @db.Text
+  avatarUrl String?   @db.Text
+  posts     Post[]
+  likes     Like[]
+  comments  Comment[]
+  hasLoggedInBefore Boolean @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+}
+
+
+enum Visibility {
+  PUBLIC
+  ONLY_ME
+}
+model Post {
+  id         String     @id @default(cuid())
+  content    String?    @db.Text
+  imageUrls  Json       @default("[]")
+  visibility Visibility @default(PUBLIC)
+  
+  authorId   String
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  likes      Like[]
+  comments   Comment[]
+  
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String    @db.Text
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Nested replies support
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
