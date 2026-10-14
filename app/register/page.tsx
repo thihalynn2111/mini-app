@@ -56,10 +56,10 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-purple-100 px-4 py-10">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100 via-white to-blue-100 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 text-3xl font-bold text-white shadow-lg shadow-indigo-200">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-600 text-3xl font-bold text-white shadow-lg shadow-sky-200">
             S
           </div>
 
@@ -74,7 +74,7 @@ export default function RegisterPage() {
 
         <form
           onSubmit={handleRegister}
-          className="rounded-2xl border border-gray-200 bg-white p-6 shadow-xl shadow-gray-200/60 sm:p-8"
+          className="rounded-2xl border border-sky-100 bg-white p-6 shadow-xl shadow-sky-100/60 sm:p-8"
         >
           <div className="mb-5">
             <label
@@ -91,7 +91,7 @@ export default function RegisterPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-sky-200 bg-sky-50/60 px-4 py-3 text-gray-900 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100"
             />
           </div>
 
@@ -110,7 +110,7 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-sky-200 bg-sky-50/60 px-4 py-3 text-gray-900 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100"
             />
           </div>
 
@@ -129,14 +129,14 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
+              className="w-full rounded-xl border border-sky-200 bg-sky-50/60 px-4 py-3 text-gray-900 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-3.5 font-semibold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 disabled:opacity-60"
+            className="flex w-full items-center justify-center rounded-xl bg-sky-600 px-4 py-3.5 font-semibold text-white shadow-md shadow-sky-200 transition hover:bg-sky-700 disabled:opacity-60"
           >
             {loading ? "Creating account..." : "Create account"}
           </button>
@@ -157,7 +157,7 @@ export default function RegisterPage() {
             Already have an account?{" "}
             <Link
               href="/auth/login"
-              className="font-semibold text-indigo-600 hover:underline"
+              className="font-semibold text-sky-600 hover:underline"
             >
               Log in
             </Link>

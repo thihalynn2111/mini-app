@@ -400,7 +400,7 @@ function UserProfileContent() {
                     </div>
                   </div>
 
-                  {/* Editing View or Content */}
+                  {/* Editing View with Image Upload */}
                   {editingPostId === post.id ? (
                     <div className="space-y-3 bg-sky-50/40 p-4 rounded-xl border border-sky-200">
                       <textarea
@@ -409,6 +409,68 @@ function UserProfileContent() {
                         className="w-full p-3 text-sm bg-white border border-sky-200 rounded-xl focus:outline-none resize-none"
                         rows={3}
                       />
+
+                      {/* Edit Images Section */}
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-sky-700">
+                          Edit Images (Up to 8):
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => {
+                            const files = e.target.files;
+                            if (!files) return;
+                            const remainingSlots = 8 - editImageUrls.length;
+                            const filesToProcess = Array.from(files).slice(
+                              0,
+                              remainingSlots,
+                            );
+
+                            filesToProcess.forEach((file) => {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setEditImageUrls((prev) => [
+                                  ...prev,
+                                  reader.result as string,
+                                ]);
+                              };
+                              reader.readAsDataURL(file);
+                            });
+                          }}
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-sky-200 text-sky-900 text-xs focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700"
+                        />
+
+                        {editImageUrls.length > 0 && (
+                          <div className="grid grid-cols-4 gap-2 mt-2">
+                            {editImageUrls.map((url, idx) => (
+                              <div
+                                key={idx}
+                                className="relative w-full h-20 rounded-lg overflow-hidden border border-sky-200"
+                              >
+                                <img
+                                  src={url}
+                                  alt={`Edit Preview ${idx + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setEditImageUrls(
+                                      editImageUrls.filter((_, i) => i !== idx),
+                                    )
+                                  }
+                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold cursor-pointer"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex items-center justify-between pt-1">
                         <select
                           value={editVisibility}
@@ -422,14 +484,14 @@ function UserProfileContent() {
                           <button
                             type="button"
                             onClick={() => setEditingPostId(null)}
-                            className="px-4 py-1.5 bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl"
+                            className="px-4 py-1.5 bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl cursor-pointer"
                           >
                             Cancel
                           </button>
                           <button
                             type="button"
                             onClick={() => handleUpdatePost(post.id)}
-                            className="px-4 py-1.5 bg-sky-600 text-white text-xs font-semibold rounded-xl"
+                            className="px-4 py-1.5 bg-sky-600 text-white text-xs font-semibold rounded-xl cursor-pointer"
                           >
                             Save
                           </button>
@@ -444,7 +506,7 @@ function UserProfileContent() {
                     )
                   )}
 
-                  {/* Images */}
+                  {/* Images Display */}
                   {post.imageUrls && post.imageUrls.length > 0 && (
                     <div
                       className={`grid gap-2 rounded-xl overflow-hidden ${
@@ -610,7 +672,7 @@ function UserProfileContent() {
                               </form>
                             )}
 
-                            {/* Nested Replies with Reply & Delete buttons */}
+                            {/* Nested Replies */}
                             {comment.replies && comment.replies.length > 0 && (
                               <div className="ml-10 space-y-2 border-l-2 border-sky-200 pl-3 pt-1">
                                 {comment.replies.map((reply) => (

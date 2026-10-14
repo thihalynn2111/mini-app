@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId } from "@/lib/auth";
 
-// PATCH: Edit Post Content or Change Visibility (Public / Only Me)
+// PATCH: Edit Post Content, Visibility, or Images
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> | { id: string } },
@@ -32,7 +32,8 @@ export async function PATCH(
       );
     }
 
-    const { content, visibility } = await req.json();
+    // 👉 imageUrls ကိုပါ request body မှ ထည့်သွင်းဖတ်ရှုရန်
+    const { content, visibility, imageUrls } = await req.json();
 
     const updatedPost = await prisma.post.update({
       where: { id: postId },
@@ -42,6 +43,10 @@ export async function PATCH(
         }),
         ...(visibility && {
           visibility: visibility === "ONLY_ME" ? "ONLY_ME" : "PUBLIC",
+        }),
+        // 👉 imageUrls အသစ်များကို database တွင် ထည့်သွင်းရန်
+        ...(imageUrls !== undefined && {
+          imageUrls: imageUrls,
         }),
       },
       include: {
